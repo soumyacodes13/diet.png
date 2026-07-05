@@ -24,14 +24,16 @@ export default function ConvertPage() {
   const [isEstimating, setIsEstimating] = useState<boolean>(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
   const [customFileName, setCustomFileName] = useState<string>('');
+  const fileNameInitialized = React.useRef(false);
 
-  // Initialize custom filename when item is loaded
+  // Initialize custom filename only once when item is first loaded
   useEffect(() => {
-    if (item && !customFileName) {
+    if (item && !fileNameInitialized.current) {
       const nameWithoutExt = item.name.substring(0, item.name.lastIndexOf('.')) || item.name;
       setCustomFileName(nameWithoutExt);
+      fileNameInitialized.current = true;
     }
-  }, [item, customFileName]);
+  }, [item]);
 
   // Redirect to home if empty
   useEffect(() => {
