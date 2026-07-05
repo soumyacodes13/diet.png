@@ -1,63 +1,72 @@
-import Image from "next/image";
+'use client';
+
+import React, { useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { Sparkles, FileImage } from 'lucide-react';
+import Header from '@/components/Header';
+import FileDropzone from '@/components/FileDropzone';
+import { useFiles } from '@/context/FileContext';
 
 export default function Home() {
+  const router = useRouter();
+  const { setItem } = useFiles();
+
+  const handleFilesAdded = useCallback(
+    (files: FileList | File[]) => {
+      const filesArray = Array.from(files);
+      const allowedTypes = ['image/'];
+      
+      const firstFile = filesArray.find((file) => {
+        return allowedTypes.some(type => file.type.startsWith(type));
+      });
+
+      if (firstFile) {
+        const newItem = {
+          id: `${firstFile.name}-${firstFile.size}-${Date.now()}`,
+          file: firstFile,
+          name: firstFile.name,
+          size: firstFile.size,
+          previewUrl: URL.createObjectURL(firstFile),
+          targetFormat: 'webp' as const,
+          quality: 90,
+          status: 'idle' as const,
+        };
+
+        setItem(newItem);
+        router.push('/convert');
+      }
+    },
+    [setItem, router]
+  );
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex-1 flex flex-col min-h-screen bg-[#F4F4F0] bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:20px_20px]">
+      <Header />
+
+      <main className="flex-1 max-w-4xl w-full mx-auto px-6 py-12 flex flex-col justify-center gap-8 animate-in fade-in duration-300">
+        {/* Intro Banner */}
+        <div className="neo-card p-8 bg-retro-blue text-black relative overflow-hidden shadow-[6px_6px_0px_0px_#000]">
+          <div className="absolute right-[-10px] bottom-[-20px] opacity-15 pointer-events-none rotate-12">
+            <FileImage className="w-64 h-64 text-black" />
+          </div>
+
+          <div className="relative z-10 flex flex-col gap-4">
+            <span className="bg-retro-yellow text-black text-xs font-black uppercase tracking-wider px-3 py-1 border-2 border-black shadow-[2px_2px_0px_0px_#000] self-start inline-flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 fill-black" />
+              100% Client-Side
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-heading font-black lowercase tracking-tight leading-none text-black">
+              diet.png
+            </h2>
+            <p className="text-sm sm:text-base font-bold text-black/80 max-w-2xl leading-relaxed">
+              Convert, compress, and resize images locally in your browser. No files are uploaded to any servers, keeping your data entirely private.
+            </p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Core Workspace Dropzone */}
+        <div className="flex flex-col gap-6">
+          <FileDropzone onFilesAdded={handleFilesAdded} />
         </div>
       </main>
     </div>

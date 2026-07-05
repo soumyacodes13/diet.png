@@ -1,26 +1,82 @@
 @import "tailwindcss";
 
+@theme {
+  --color-retro-yellow: #ffe600;
+  --color-retro-orange: #ff5c00;
+  --color-retro-green: #00e676;
+  --color-retro-blue: #2979ff;
+  --color-retro-purple: #d500f9;
+  --color-retro-pink: #ff4081;
+  --color-retro-bg: #faf8f5;
+  
+  --shadow-neo: 6px 6px 0px 0px #000000;
+  --shadow-neo-sm: 3px 3px 0px 0px #000000;
+  --shadow-neo-lg: 12px 12px 0px 0px #000000;
+  --shadow-neo-active: 2px 2px 0px 0px #000000;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #faf8f5;
+  --foreground: #000000;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-outfit), sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-weight: 700;
+}
+
+/* Custom Neobrutalism styling classes */
+.neo-border {
+  border: 4px solid #000000;
+}
+
+.neo-border-sm {
+  border: 2px solid #000000;
+}
+
+.neo-btn {
+  border: 4px solid #000000;
+  box-shadow: 6px 6px 0px 0px #000000;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.neo-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 4px 4px 0px 0px #000000;
+}
+
+.neo-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: 2px 2px 0px 0px #000000;
+}
+
+.neo-card {
+  background-color: #ffffff;
+  border: 4px solid #000000;
+  box-shadow: 6px 6px 0px 0px #000000;
+}
+
+/* Custom Scrollbar for neobrutalist vibe */
+::-webkit-scrollbar {
+  width: 16px;
+}
+
+::-webkit-scrollbar-track {
+  background: #faf8f5;
+  border-left: 4px solid #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ffe600;
+  border: 4px solid #000000;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff5c00;
 }
