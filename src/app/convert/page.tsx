@@ -1,11 +1,15 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Trash2, Download, Play, Check, AlertCircle, RefreshCw, FileText, Settings, X } from 'lucide-react';
+import { ArrowLeft, Trash2, Download, Play, Check, AlertCircle, RefreshCw, FileText, Settings, X, Crop as CropIcon } from 'lucide-react';
 import Header from '@/components/Header';
 import { useFiles, QueueItem } from '@/context/FileContext';
 import { convertImage } from '@/utils/converter';
+import ReactCrop, { type Crop as ReactImageCrop, type PixelCrop } from 'react-image-crop';
+import { getCroppedImg } from '@/utils/crop';
+import 'react-image-crop/dist/ReactCrop.css';
+
 
 export function formatBytes(bytes: number, decimals = 1) {
   if (bytes === 0) return '0 B';
@@ -25,6 +29,85 @@ export default function ConvertPage() {
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
   const [customFileName, setCustomFileName] = useState<string>('');
   const fileNameInitialized = React.useRef(false);
+
+  // Crop states
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+  const [crop, setCrop] = useState<ReactImageCrop>({
+    unit: '%',
+    width: 80,
+    height: 80,
+    x: 10,
+    y: 10,
+  });
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
+  const [aspect, setAspect] = useState<number | undefined>(undefined);
+  const imgRef = useRef<HTMLImageElement | null>(null);
+
+  const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    imgRef.current = e.currentTarget;
+    const { width, height } = e.currentTarget;
+    
+    // Initial crop in percentage
+    const percentWidth = 80;
+    const percentHeight = aspect ? percentWidth / aspect : 80;
+    
+    // Make sure height doesn't exceed 80%
+    const finalPercentHeight = Math.min(percentHeight, 80);
+    const finalPercentWidth = aspect ? finalPercentHeight * aspect : percentWidth;
+    
+    const initialCrop = {
+      unit: '%' as const,
+      x: (100 - finalPercentWidth) / 2,
+      y: (100 - finalPercentHeight) / 2,
+      width: finalPercentWidth,
+      height: finalPercentHeight,
+    };
+    
+    setCrop(initialCrop);
+    
+    // Set completed crop in pixels
+    const pixelWidth = (finalPercentWidth / 100) * width;
+    const pixelHeight = (finalPercentHeight / 100) * height;
+    setCompletedCrop({
+      unit: 'px',
+      x: ((100 - finalPercentWidth) / 200) * width,
+      y: ((100 - finalPercentHeight) / 200) * height,
+      width: pixelWidth,
+      height: pixelHeight,
+    });
+  }, [aspect]);
+
+  const handleSaveCrop = useCallback(async () => {
+    if (!item || !imgRef.current || !completedCrop || completedCrop.width === 0 || completedCrop.height === 0) return;
+
+    try {
+      const croppedFile = await getCroppedImg(imgRef.current, completedCrop, item.name);
+      
+      // Revoke old object URL
+      URL.revokeObjectURL(item.previewUrl);
+      if (item.convertedUrl) URL.revokeObjectURL(item.convertedUrl);
+
+      setItem((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          file: croppedFile,
+          size: croppedFile.size,
+          previewUrl: URL.createObjectURL(croppedFile),
+          status: 'idle' as const,
+          convertedUrl: undefined,
+          convertedFileName: undefined,
+          convertedSize: undefined,
+          convertedBlob: undefined,
+        };
+      });
+
+      setIsCropModalOpen(false);
+    } catch (err) {
+      console.error('Failed to crop image:', err);
+    }
+  }, [item, completedCrop, setItem]);
+
 
   // Initialize custom filename only once when item is first loaded
   useEffect(() => {
@@ -188,6 +271,18 @@ export default function ConvertPage() {
                   <FileText className="w-16 h-16 text-black/30 stroke-[1.5px]" />
                 )}
               </div>
+
+              {/* Crop Button */}
+              {item.status !== 'converting' && (
+                <button
+                  onClick={() => setIsCropModalOpen(true)}
+                  className="px-4 py-2 bg-retro-yellow text-black font-heading font-black uppercase text-xs border-4 border-black shadow-[3px_3px_0px_0px_#000] hover:translate-x-[1.5px] hover:translate-y-[1.5px] hover:shadow-[1.5px_1.5px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-[0px_0px_0px_0px_#000] transition-all cursor-pointer flex items-center gap-1.5 w-full justify-center rotate-[0.5deg] text-center"
+                >
+                  <CropIcon className="w-4 h-4 stroke-[3px]" />
+                  Crop Original Image
+                </button>
+              )}
+
 
               {/* Data Table */}
               <div className="border-t-4 border-black pt-4 flex flex-col gap-2 w-full text-xs font-bold">
@@ -461,6 +556,94 @@ export default function ConvertPage() {
                   alt="Preview"
                 />
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Crop Modal Overlay */}
+      {isCropModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_#000] w-full max-w-2xl max-h-[90vh] flex flex-col z-50 rotate-[-0.2deg] overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="bg-retro-yellow border-b-4 border-black px-4 py-3 flex justify-between items-center font-heading font-black uppercase text-sm select-none border-t-0">
+              <span>Crop Image</span>
+              <button
+                onClick={() => setIsCropModalOpen(false)}
+                className="p-1 hover:bg-black/10 border border-transparent hover:border-black transition-all cursor-pointer flex items-center justify-center"
+                title="Close Crop"
+              >
+                <X className="w-5 h-5 stroke-[3px]" />
+              </button>
+            </div>
+
+            {/* Aspect Ratio Selector bar */}
+            <div className="bg-white border-b-4 border-black px-4 py-2 flex flex-wrap gap-2 items-center select-none text-xs font-bold">
+              <span className="text-black/55 uppercase tracking-wide mr-2">Aspect Ratio:</span>
+              {[
+                { label: 'Free', val: undefined },
+                { label: '1:1 Square', val: 1 },
+                { label: '4:3 Standard', val: 4/3 },
+                { label: '16:9 Widescreen', val: 16/9 },
+              ].map((aspectOption) => (
+                <button
+                  key={aspectOption.label}
+                  onClick={() => {
+                    setAspect(aspectOption.val);
+                    // Reset crop to apply aspect
+                    setCrop({
+                      unit: '%',
+                      width: 80,
+                      height: aspectOption.val ? 80 / aspectOption.val : 80,
+                      x: 10,
+                      y: 10,
+                    });
+                  }}
+                  className={`px-3 py-1.5 border-2 border-black font-heading font-black uppercase text-[10px] shadow-[2px_2px_0px_0px_#000] hover:translate-x-[0.5px] hover:translate-y-[0.5px] hover:shadow-[1.5px_1.5px_0px_0px_#000] active:translate-x-[1.5px] active:translate-y-[1.5px] active:shadow-none transition-all cursor-pointer ${
+                    aspect === aspectOption.val ? 'bg-retro-orange text-black' : 'bg-white text-black'
+                  }`}
+                >
+                  {aspectOption.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Cropping Canvas Body */}
+            <div className="p-6 overflow-y-auto flex-1 bg-[#F4F4F0] min-h-0 flex flex-col items-center justify-center">
+              <div className="max-w-full max-h-[50vh] overflow-auto border-4 border-black shadow-[4px_4px_0px_0px_#000] bg-neutral-100 flex items-center justify-center">
+                <ReactCrop
+                  crop={crop}
+                  onChange={(c) => setCrop(c)}
+                  onComplete={(c) => setCompletedCrop(c)}
+                  aspect={aspect}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    ref={imgRef}
+                    src={item.previewUrl}
+                    alt="Original for cropping"
+                    className="max-h-[50vh] object-contain"
+                    onLoad={onImageLoad}
+                  />
+                </ReactCrop>
+              </div>
+            </div>
+
+            {/* Footer buttons */}
+            <div className="border-t-4 border-black p-4 bg-white flex justify-end gap-3 select-none">
+              <button
+                onClick={() => setIsCropModalOpen(false)}
+                className="px-4 py-2 bg-white text-black font-heading font-black uppercase text-xs border-4 border-black shadow-[3px_3px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveCrop}
+                disabled={!completedCrop || completedCrop.width === 0 || completedCrop.height === 0}
+                className="px-6 py-2 bg-retro-green text-black font-heading font-black uppercase text-xs border-4 border-black shadow-[3px_3px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all cursor-pointer disabled:opacity-50"
+              >
+                Apply Crop
+              </button>
             </div>
           </div>
         </div>
