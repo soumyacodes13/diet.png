@@ -298,11 +298,16 @@ export default function Home() {
 
                   <div className="text-xs font-bold text-black/75 leading-relaxed">
                     {mobileState === 'listening' && (
-                      <ol className="list-decimal pl-4 flex flex-col gap-1.5">
-                        <li>Scan the QR code with your phone's camera.</li>
-                        <li>Tap the screen to select a picture or capture a photo.</li>
-                        <li>Keep this page open while the file transfers over Wi-Fi/LTE.</li>
-                      </ol>
+                      <div className="flex flex-col gap-3">
+                        <ol className="list-decimal pl-4 flex flex-col gap-1.5">
+                          <li>Scan the QR code with your phone's camera.</li>
+                          <li>Tap the screen to select a picture or capture a photo.</li>
+                          <li>Keep this page open while the file transfers over Wi-Fi/LTE.</li>
+                        </ol>
+                        <div className="text-[10px] text-black font-black uppercase tracking-wide mt-1 border-2 border-black bg-retro-pink/20 px-2 py-1.5 shadow-[2px_2px_0px_0px_#000] rotate-[-0.5deg] w-fit inline-flex items-center gap-1">
+                          ⚠️ Maximum file size: 2MB
+                        </div>
+                      </div>
                     )}
                     {mobileState === 'uploading' && (
                       <div className="flex flex-col gap-2 bg-neutral-50 border-4 border-black p-3 shadow-[3px_3px_0px_0px_#000] rotate-[-0.5deg]">

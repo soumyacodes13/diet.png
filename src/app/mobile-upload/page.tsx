@@ -38,9 +38,9 @@ function MobileUploadContent() {
         return;
       }
       
-      // Limit to 15MB (ntfy.sh free limit)
-      if (selectedFile.size > 15 * 1024 * 1024) {
-        setErrorMessage('File size exceeds the 15MB limit.');
+      // Limit to 2MB (ntfy.sh public anonymous upload limit)
+      if (selectedFile.size > 2 * 1024 * 1024) {
+        setErrorMessage('File size exceeds the 2MB server limit.');
         setStatus('error');
         return;
       }
@@ -180,7 +180,7 @@ function MobileUploadContent() {
             Tap to Select Image
           </h2>
           <p className="text-xs font-bold text-black/60 max-w-[240px] leading-relaxed">
-            Take a photo with your camera or select an existing picture from your library.
+            Take a photo with your camera or select an existing picture from your library (Max 2MB).
           </p>
         </div>
       )}
