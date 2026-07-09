@@ -287,7 +287,6 @@ export default function Home() {
                 <div className="flex flex-col gap-3">
                   <span className="bg-retro-blue text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 border-2 border-black shadow-[2px_2px_0px_0px_#000] self-start inline-flex items-center gap-1">
                     <Wifi className="w-3.5 h-3.5" />
-                    Serverless Sync
                   </span>
 
                   <h3 className="font-heading font-black text-xl uppercase tracking-tight leading-none text-black">
