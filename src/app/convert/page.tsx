@@ -83,8 +83,10 @@ export default function ConvertPage() {
     try {
       const croppedFile = await getCroppedImg(imgRef.current, completedCrop, item.name);
       
-      // Revoke old object URL
-      URL.revokeObjectURL(item.previewUrl);
+      // Revoke old object URL only if it's not the original uploaded one
+      if (item.previewUrl !== item.originalPreviewUrl) {
+        URL.revokeObjectURL(item.previewUrl);
+      }
       if (item.convertedUrl) URL.revokeObjectURL(item.convertedUrl);
 
       setItem((prev) => {
@@ -163,7 +165,10 @@ export default function ConvertPage() {
 
   const handleClear = useCallback(() => {
     if (item) {
-      URL.revokeObjectURL(item.previewUrl);
+      if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      if (item.originalPreviewUrl && item.originalPreviewUrl !== item.previewUrl) {
+        URL.revokeObjectURL(item.originalPreviewUrl);
+      }
       if (item.convertedUrl) URL.revokeObjectURL(item.convertedUrl);
     }
     setCustomFileName('');
