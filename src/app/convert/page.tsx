@@ -24,16 +24,34 @@ export default function ConvertPage() {
   const [isEstimating, setIsEstimating] = useState<boolean>(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
   const [customFileName, setCustomFileName] = useState<string>('');
-  const fileNameInitialized = React.useRef(false);
+  
+  const loadedItemIdRef = React.useRef<string | null>(null);
+  const prevItemRef = React.useRef<QueueItem | null>(null);
 
-  // Initialize custom filename only once when item is first loaded
+  // Reset and initialize page states when a new item is loaded
   useEffect(() => {
-    if (item && !fileNameInitialized.current) {
-      const nameWithoutExt = item.name.substring(0, item.name.lastIndexOf('.')) || item.name;
-      setCustomFileName(nameWithoutExt);
-      fileNameInitialized.current = true;
+    if (item) {
+      // 1. If it's a new item, reset states
+      if (item.id !== loadedItemIdRef.current) {
+        const nameWithoutExt = item.name.substring(0, item.name.lastIndexOf('.')) || item.name;
+        setCustomFileName(nameWithoutExt);
+        setEstimatedSize(null);
+        setIsEstimating(false);
+        setIsPreviewOpen(false);
+        loadedItemIdRef.current = item.id;
+      }
+
+      // 2. Revoke old object URLs to prevent browser memory leaks
+      if (prevItemRef.current && prevItemRef.current.id !== item.id) {
+        const prev = prevItemRef.current;
+        if (prev.previewUrl) URL.revokeObjectURL(prev.previewUrl);
+        if (prev.convertedUrl) URL.revokeObjectURL(prev.convertedUrl);
+      }
+      
+      prevItemRef.current = item;
     }
   }, [item]);
+
 
   // Redirect to home if empty
   useEffect(() => {
