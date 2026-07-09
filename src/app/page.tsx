@@ -106,15 +106,18 @@ export default function Home() {
               const blob = await fileRes.blob();
               const finalFile = new File([blob], fileName, { type: blob.type || 'image/jpeg' });
 
+              const previewUrl = URL.createObjectURL(finalFile);
               const newItem = {
                 id: `${finalFile.name}-${finalFile.size}-${Date.now()}`,
                 file: finalFile,
                 name: finalFile.name,
                 size: finalFile.size,
-                previewUrl: URL.createObjectURL(finalFile),
+                previewUrl: previewUrl,
                 targetFormat: 'webp' as const,
                 quality: 90,
                 status: 'idle' as const,
+                originalFile: finalFile,
+                originalPreviewUrl: previewUrl,
               };
 
               setItem(newItem);
@@ -156,15 +159,18 @@ export default function Home() {
       });
 
       if (firstFile) {
+        const previewUrl = URL.createObjectURL(firstFile);
         const newItem = {
           id: `${firstFile.name}-${firstFile.size}-${Date.now()}`,
           file: firstFile,
           name: firstFile.name,
           size: firstFile.size,
-          previewUrl: URL.createObjectURL(firstFile),
+          previewUrl: previewUrl,
           targetFormat: 'webp' as const,
           quality: 90,
           status: 'idle' as const,
+          originalFile: firstFile,
+          originalPreviewUrl: previewUrl,
         };
 
         setItem(newItem);

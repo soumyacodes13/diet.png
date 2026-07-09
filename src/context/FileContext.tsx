@@ -17,6 +17,8 @@ export interface QueueItem {
   convertedFileName?: string;
   convertedSize?: number;
   convertedBlob?: Blob;
+  originalFile?: File;
+  originalPreviewUrl?: string;
 }
 
 interface FileContextType {
