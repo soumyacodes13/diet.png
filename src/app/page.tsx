@@ -83,66 +83,46 @@ export default function Home() {
       evSource.onmessage = async (event) => {
         try {
           const data = JSON.parse(event.data);
-          if (data.event === 'message' && data.message) {
-            try {
-              const signal = JSON.parse(data.message);
-              if (signal.type === 'upload_start') {
-                setIncomingFileName(signal.name || 'image');
-                setIncomingFileSize(signal.size || 0);
-                setMobileState('uploading');
-              } else if (signal.type === 'upload_error') {
-                setErrorMsg(signal.message || 'Unknown upload error');
-                setMobileState('error');
-              } else if (signal.type === 'upload_complete') {
-                setMobileState('processing');
-                try {
-                  const pageUrl = signal.url;
-                  const fileName = signal.name || 'image.jpg';
+          if (data.event === 'message') {
+            if (data.message && data.message.startsWith('upload_start:')) {
+              // Format: upload_start:filename:size
+              const parts = data.message.split(':');
+              const name = parts[1] || 'image';
+              const size = parseInt(parts[2] || '0', 10);
+              setIncomingFileName(name);
+              setIncomingFileSize(size);
+              setMobileState('uploading');
+            } else if (data.message && data.message.startsWith('upload_error:')) {
+              const message = data.message.substring(13);
+              setErrorMsg(message);
+              setMobileState('error');
+            } else if (data.attachment) {
+              setMobileState('processing');
+              const fileUrl = data.attachment.url;
+              const fileName = data.attachment.name || 'image.jpg';
 
-                  // 1. Fetch the HTML page to scrape the dynamic direct download URL
-                  const pageRes = await fetch(pageUrl);
-                  if (!pageRes.ok) throw new Error('Transit server returned ' + pageRes.status);
-                  const html = await pageRes.text();
+              // Fetch the uploaded attachment directly from ntfy
+              const fileRes = await fetch(fileUrl);
+              const blob = await fileRes.blob();
+              const finalFile = new File([blob], fileName, { type: blob.type || 'image/jpeg' });
 
-                  // 2. Extract direct link using regex
-                  const dlMatch = html.match(/href="(https:\/\/tmpfiles\.org\/dl\/[^"]+)"/);
-                  if (!dlMatch) throw new Error('Download session expired or file format unsupported.');
-                  const directUrl = dlMatch[1];
+              const previewUrl = URL.createObjectURL(finalFile);
+              const newItem = {
+                id: `${finalFile.name}-${finalFile.size}-${Date.now()}`,
+                file: finalFile,
+                name: finalFile.name,
+                size: finalFile.size,
+                previewUrl: previewUrl,
+                targetFormat: 'webp' as const,
+                quality: 90,
+                status: 'idle' as const,
+                originalFile: finalFile,
+                originalPreviewUrl: previewUrl,
+              };
 
-                  // 3. Fetch the actual raw file bytes
-                  const fileRes = await fetch(directUrl);
-                  if (!fileRes.ok) throw new Error('Download from file server failed.');
-                  const blob = await fileRes.blob();
-                  const finalFile = new File([blob], fileName, { type: blob.type || 'image/jpeg' });
-
-                  const previewUrl = URL.createObjectURL(finalFile);
-                  const newItem = {
-                    id: `${finalFile.name}-${finalFile.size}-${Date.now()}`,
-                    file: finalFile,
-                    name: finalFile.name,
-                    size: finalFile.size,
-                    previewUrl: previewUrl,
-                    targetFormat: 'webp' as const,
-                    quality: 90,
-                    status: 'idle' as const,
-                    originalFile: finalFile,
-                    originalPreviewUrl: previewUrl,
-                  };
-
-                  setItem(newItem);
-                  if (evSourceRef.current) {
-                    evSourceRef.current.close();
-                    evSourceRef.current = null;
-                  }
-                  router.push('/convert');
-                } catch (fetchErr: any) {
-                  console.error('Error downloading synced file:', fetchErr);
-                  setErrorMsg(fetchErr.message || 'Failed to download sync file.');
-                  setMobileState('error');
-                }
-              }
-            } catch (jsonErr) {
-              console.warn('Non-JSON message received on SSE stream:', jsonErr);
+              setItem(newItem);
+              evSource.close();
+              router.push('/convert');
             }
           }
         } catch (err) {
@@ -214,13 +194,13 @@ export default function Home() {
           <div className="relative z-10 flex flex-col gap-4">
             <span className="bg-retro-yellow text-black text-xs font-black uppercase tracking-wider px-3 py-1 border-2 border-black shadow-[2px_2px_0px_0px_#000] self-start inline-flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5 fill-black" />
-              Private & Serverless
+              100% Client-Side
             </span>
             <h2 className="text-3xl sm:text-5xl font-heading font-black lowercase tracking-tight leading-none text-black">
               diet.png
             </h2>
             <p className="text-sm sm:text-base font-bold text-black/80 max-w-2xl leading-relaxed">
-              Convert, compress, and resize images locally in your browser. Files remain entirely private (mobile sync files are encrypted and automatically deleted in 60 mins).
+              Convert, compress, and resize images locally in your browser. No files are uploaded to any servers, keeping your data entirely private.
             </p>
           </div>
         </div>
