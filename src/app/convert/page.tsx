@@ -610,19 +610,20 @@ export default function ConvertPage() {
 
             {/* Cropping Canvas Body */}
             <div className="p-6 flex-1 bg-[#F4F4F0] min-h-0 flex flex-col items-center justify-center">
-              <div className="max-w-full max-h-[50vh] overflow-hidden border-4 border-black shadow-[4px_4px_0px_0px_#000] bg-neutral-100 flex items-center justify-center">
+              <div className="border-4 border-black shadow-[4px_4px_0px_0px_#000] bg-neutral-100 p-1 max-w-full max-h-[50vh] overflow-hidden flex items-center justify-center">
                 <ReactCrop
                   crop={crop}
                   onChange={(c) => setCrop(c)}
                   onComplete={(c) => setCompletedCrop(c)}
                   aspect={aspect}
+                  className="max-w-full"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     ref={imgRef}
                     src={item.originalPreviewUrl || item.previewUrl}
                     alt="Original for cropping"
-                    className="max-h-[50vh] object-contain"
+                    style={{ maxHeight: '46vh', maxWidth: '100%', height: 'auto', display: 'block' }}
                     onLoad={onImageLoad}
                   />
                 </ReactCrop>
