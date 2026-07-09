@@ -19,17 +19,132 @@ function formatBytes(bytes: number, decimals = 1) {
 
 export default function Home() {
   const router = useRouter();
-  const {
-    setItem,
-    showMobilePanel,
-    qrCodeUrl,
-    mobileState,
-    incomingFileName,
-    incomingFileSize,
-    errorMsg,
-    enableMobileUpload,
-    disableMobileUpload,
-  } = useFiles();
+  const { setItem } = useFiles();
+
+  // Mobile Sync states
+  const [showMobilePanel, setShowMobilePanel] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [mobileState, setMobileState] = useState<'idle' | 'generating' | 'listening' | 'uploading' | 'processing' | 'error'>('idle');
+  const [incomingFileName, setIncomingFileName] = useState('');
+  const [incomingFileSize, setIncomingFileSize] = useState(0);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const evSourceRef = useRef<EventSource | null>(null);
+
+  const disableMobileUpload = useCallback(() => {
+    if (evSourceRef.current) {
+      evSourceRef.current.close();
+      evSourceRef.current = null;
+    }
+    setShowMobilePanel(false);
+    setQrCodeUrl('');
+    setMobileState('idle');
+  }, []);
+
+  const enableMobileUpload = useCallback(async () => {
+    // 1. Reset and close any active connection
+    if (evSourceRef.current) {
+      evSourceRef.current.close();
+    }
+
+    setShowMobilePanel(true);
+    setMobileState('generating');
+    setErrorMsg('');
+
+    // Generate topic ID
+    const topicId = 'nexconvert_' + Array.from({ length: 12 }, () => Math.random().toString(36)[2]).join('');
+
+    try {
+      // 2. Determine base URL (handles local dev network environments)
+      let baseUrl = window.location.origin;
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        try {
+          const res = await fetch('/api/local-ip');
+          const data = await res.json();
+          if (data.ip && data.ip !== 'localhost') {
+            baseUrl = `http://${data.ip}:${window.location.port || '3000'}`;
+          }
+        } catch (e) {
+          console.warn('Failed to detect local IP, using page origin', e);
+        }
+      }
+
+      const mobileUrl = `${baseUrl}/mobile-upload?topic=${topicId}`;
+
+      // 3. Generate QR code image
+      const qrDataUrl = await QRCode.toDataURL(mobileUrl, { width: 220, margin: 1 });
+      setQrCodeUrl(qrDataUrl);
+      setMobileState('listening');
+
+      // 4. Connect to SSE
+      const evSource = new EventSource(`https://ntfy.sh/${topicId}/sse`);
+      evSourceRef.current = evSource;
+
+      evSource.onmessage = async (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.event === 'message') {
+            if (data.message && data.message.startsWith('upload_start:')) {
+              // Format: upload_start:filename:size
+              const parts = data.message.split(':');
+              const name = parts[1] || 'image';
+              const size = parseInt(parts[2] || '0', 10);
+              setIncomingFileName(name);
+              setIncomingFileSize(size);
+              setMobileState('uploading');
+            } else if (data.message && data.message.startsWith('upload_error:')) {
+              const message = data.message.substring(13);
+              setErrorMsg(message);
+              setMobileState('error');
+            } else if (data.attachment) {
+              setMobileState('processing');
+              const fileUrl = data.attachment.url;
+              const fileName = data.attachment.name || 'image.jpg';
+
+              // Fetch the uploaded attachment directly from ntfy
+              const fileRes = await fetch(fileUrl);
+              const blob = await fileRes.blob();
+              const finalFile = new File([blob], fileName, { type: blob.type || 'image/jpeg' });
+
+              const newItem = {
+                id: `${finalFile.name}-${finalFile.size}-${Date.now()}`,
+                file: finalFile,
+                name: finalFile.name,
+                size: finalFile.size,
+                previewUrl: URL.createObjectURL(finalFile),
+                targetFormat: 'webp' as const,
+                quality: 90,
+                status: 'idle' as const,
+              };
+
+              setItem(newItem);
+              evSource.close();
+              router.push('/convert');
+            }
+          }
+        } catch (err) {
+          console.error('Error processing sync stream event:', err);
+        }
+      };
+
+      evSource.onerror = () => {
+        setErrorMsg('Disconnected from sync server. Attempting to reconnect...');
+        setMobileState('error');
+      };
+
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Failed to initialize QR code.');
+      setMobileState('error');
+    }
+  }, [router, setItem]);
+
+  useEffect(() => {
+    return () => {
+      if (evSourceRef.current) {
+        evSourceRef.current.close();
+      }
+    };
+  }, []);
 
   const handleFilesAdded = useCallback(
     (files: FileList | File[]) => {
@@ -58,7 +173,6 @@ export default function Home() {
     },
     [setItem, router]
   );
-
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-[#F4F4F0] bg-[linear-gradient(to_right,#0000000a_1px,transparent_1px),linear-gradient(to_bottom,#0000000a_1px,transparent_1px)] bg-[size:20px_20px]">

@@ -234,12 +234,6 @@ function MobileUploadContent() {
               Check your computer screen. The image should load automatically.
             </p>
           </div>
-          <button
-            onClick={resetPage}
-            className="px-6 py-2.5 bg-white text-black font-heading font-black uppercase text-xs border-4 border-black shadow-[3px_3px_0px_0px_#000] hover:translate-x-[1.5px] hover:translate-y-[1.5px] hover:shadow-[1.5px_1.5px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-[0px_0px_0px_0px_#000] transition-all cursor-pointer"
-          >
-            Upload Another
-          </button>
         </div>
       )}
 
