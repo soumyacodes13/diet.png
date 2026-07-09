@@ -61,22 +61,17 @@ function MobileUploadContent() {
     setProgress(0);
 
     try {
-      // 1. Send start signal
+      // 1. Send start signal via ntfy
       await fetch(`https://ntfy.sh/${topic}`, {
         method: 'POST',
-        body: `upload_start:${selectedFile.name}:${selectedFile.size}`
+        body: JSON.stringify({ type: 'upload_start', name: selectedFile.name, size: selectedFile.size })
       });
 
-      // 2. Perform raw binary upload with XMLHttpRequest to track progress
+      // 2. Perform upload to tmpfiles.org
       const xhr = new XMLHttpRequest();
       xhrRef.current = xhr;
       
-      xhr.open('PUT', `https://ntfy.sh/${topic}`);
-      
-      // Set filename headers
-      xhr.setRequestHeader('Filename', selectedFile.name);
-      xhr.setRequestHeader('X-Filename', encodeURIComponent(selectedFile.name));
-      xhr.setRequestHeader('Content-type', selectedFile.type);
+      xhr.open('POST', 'https://tmpfiles.org/api/v1/upload');
 
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
@@ -85,9 +80,28 @@ function MobileUploadContent() {
         }
       };
 
-      xhr.onload = () => {
+      xhr.onload = async () => {
         if (xhr.status >= 200 && xhr.status < 300) {
-          setStatus('success');
+          try {
+            const resData = JSON.parse(xhr.responseText);
+            if (resData.status === 'success' && resData.data?.url) {
+              const url = resData.data.url;
+              // Convert to direct download link
+              const dlUrl = url.replace('https://tmpfiles.org/', 'https://tmpfiles.org/dl/');
+              
+              // Send complete signal to ntfy containing the URL
+              await fetch(`https://ntfy.sh/${topic}`, {
+                method: 'POST',
+                body: JSON.stringify({ type: 'upload_complete', url: dlUrl, name: selectedFile.name })
+              });
+              
+              setStatus('success');
+            } else {
+              handleUploadError('Invalid response from file server.');
+            }
+          } catch (e) {
+            handleUploadError('Failed to parse file server response.');
+          }
         } else {
           handleUploadError('Server returned status: ' + xhr.status);
         }
@@ -97,7 +111,10 @@ function MobileUploadContent() {
         handleUploadError('Network connection failed.');
       };
 
-      xhr.send(selectedFile);
+      // Wrap file in FormData for tmpfiles.org API
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      xhr.send(formData);
 
     } catch (err: any) {
       handleUploadError(err.message || 'Failed to start upload.');
@@ -111,7 +128,7 @@ function MobileUploadContent() {
       try {
         await fetch(`https://ntfy.sh/${topic}`, {
           method: 'POST',
-          body: `upload_error:${message}`
+          body: JSON.stringify({ type: 'upload_error', message })
         });
       } catch (e) {
         // ignore secondary error reporting failure

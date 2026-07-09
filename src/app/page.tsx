@@ -83,46 +83,46 @@ export default function Home() {
       evSource.onmessage = async (event) => {
         try {
           const data = JSON.parse(event.data);
-          if (data.event === 'message') {
-            if (data.message && data.message.startsWith('upload_start:')) {
-              // Format: upload_start:filename:size
-              const parts = data.message.split(':');
-              const name = parts[1] || 'image';
-              const size = parseInt(parts[2] || '0', 10);
-              setIncomingFileName(name);
-              setIncomingFileSize(size);
-              setMobileState('uploading');
-            } else if (data.message && data.message.startsWith('upload_error:')) {
-              const message = data.message.substring(13);
-              setErrorMsg(message);
-              setMobileState('error');
-            } else if (data.attachment) {
-              setMobileState('processing');
-              const fileUrl = data.attachment.url;
-              const fileName = data.attachment.name || 'image.jpg';
+          if (data.event === 'message' && data.message) {
+            try {
+              const signal = JSON.parse(data.message);
+              if (signal.type === 'upload_start') {
+                setIncomingFileName(signal.name || 'image');
+                setIncomingFileSize(signal.size || 0);
+                setMobileState('uploading');
+              } else if (signal.type === 'upload_error') {
+                setErrorMsg(signal.message || 'Unknown upload error');
+                setMobileState('error');
+              } else if (signal.type === 'upload_complete') {
+                setMobileState('processing');
+                const fileUrl = signal.url;
+                const fileName = signal.name || 'image.jpg';
 
-              // Fetch the uploaded attachment directly from ntfy
-              const fileRes = await fetch(fileUrl);
-              const blob = await fileRes.blob();
-              const finalFile = new File([blob], fileName, { type: blob.type || 'image/jpeg' });
+                // Fetch the uploaded attachment directly from tmpfiles.org
+                const fileRes = await fetch(fileUrl);
+                const blob = await fileRes.blob();
+                const finalFile = new File([blob], fileName, { type: blob.type || 'image/jpeg' });
 
-              const previewUrl = URL.createObjectURL(finalFile);
-              const newItem = {
-                id: `${finalFile.name}-${finalFile.size}-${Date.now()}`,
-                file: finalFile,
-                name: finalFile.name,
-                size: finalFile.size,
-                previewUrl: previewUrl,
-                targetFormat: 'webp' as const,
-                quality: 90,
-                status: 'idle' as const,
-                originalFile: finalFile,
-                originalPreviewUrl: previewUrl,
-              };
+                const previewUrl = URL.createObjectURL(finalFile);
+                const newItem = {
+                  id: `${finalFile.name}-${finalFile.size}-${Date.now()}`,
+                  file: finalFile,
+                  name: finalFile.name,
+                  size: finalFile.size,
+                  previewUrl: previewUrl,
+                  targetFormat: 'webp' as const,
+                  quality: 90,
+                  status: 'idle' as const,
+                  originalFile: finalFile,
+                  originalPreviewUrl: previewUrl,
+                };
 
-              setItem(newItem);
-              evSource.close();
-              router.push('/convert');
+                setItem(newItem);
+                evSource.close();
+                router.push('/convert');
+              }
+            } catch (jsonErr) {
+              console.warn('Non-JSON message received on SSE stream:', jsonErr);
             }
           }
         } catch (err) {
