@@ -171,7 +171,7 @@ function MobileUploadContent() {
       {status === 'idle' && (
         <div
           onClick={handleSelectClick}
-          className="neo-card p-8 bg-white border-4 border-black shadow-[6px_6px_0px_0px_#000] text-center cursor-pointer hover:bg-neutral-50 active:translate-x-[2px] active:translate-y-[2px] active:shadow-[4px_4px_0px_0px_#000] transition-all flex flex-col items-center justify-center min-h-[300px] select-none"
+          className="neo-card p-8 bg-white border-4 border-black shadow-[6px_6px_0px_0px_#000] text-center cursor-pointer hover:bg-neutral-50 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-[2px_2px_0px_0px_#000] transition-all flex flex-col items-center justify-center min-h-[300px] select-none"
         >
           <div className="bg-retro-yellow border-4 border-black p-5 mb-6 shadow-[4px_4px_0px_0px_#000] rotate-[-1deg] inline-flex items-center justify-center">
             <Upload className="w-12 h-12 stroke-[3px] text-black" />
@@ -216,7 +216,7 @@ function MobileUploadContent() {
 
           <button
             onClick={cancelUpload}
-            className="w-full py-2.5 bg-white text-black font-heading font-black uppercase text-xs border-4 border-black shadow-[3px_3px_0px_0px_#000] hover:translate-x-[1.5px] hover:translate-y-[1.5px] hover:shadow-[1.5px_1.5px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-[0px_0px_0px_0px_#000] transition-all cursor-pointer text-center"
+            className="w-full py-2.5 bg-white text-black font-heading font-black uppercase text-xs border-4 border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-[0px_0px_0px_0px_#000] transition-all cursor-pointer text-center"
           >
             Cancel Upload
           </button>
@@ -250,7 +250,7 @@ function MobileUploadContent() {
           </div>
           <button
             onClick={resetPage}
-            className="px-6 py-2.5 bg-white text-black font-heading font-black uppercase text-xs border-4 border-black shadow-[3px_3px_0px_0px_#000] hover:translate-x-[1.5px] hover:translate-y-[1.5px] hover:shadow-[1.5px_1.5px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-[0px_0px_0px_0px_#000] transition-all cursor-pointer"
+            className="px-6 py-2.5 bg-white text-black font-heading font-black uppercase text-xs border-4 border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-[0px_0px_0px_0px_#000] transition-all cursor-pointer"
           >
             Try Again
           </button>

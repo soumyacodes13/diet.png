@@ -281,7 +281,7 @@ export default function ConvertPage() {
               {item.status !== 'converting' && (
                 <button
                   onClick={() => setIsCropModalOpen(true)}
-                  className="px-4 py-2 bg-retro-yellow text-black font-heading font-black uppercase text-xs border-4 border-black shadow-[3px_3px_0px_0px_#000] hover:translate-x-[1.5px] hover:translate-y-[1.5px] hover:shadow-[1.5px_1.5px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-[0px_0px_0px_0px_#000] transition-all cursor-pointer flex items-center gap-1.5 w-full justify-center rotate-[0.5deg] text-center"
+                  className="px-4 py-2 bg-retro-yellow text-black font-heading font-black uppercase text-xs border-4 border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-[0px_0px_0px_0px_#000] transition-all cursor-pointer flex items-center gap-1.5 w-full justify-center rotate-[0.5deg] text-center"
                 >
                   <CropIcon className="w-4 h-4 stroke-[3px]" />
                   Crop Original Image
@@ -325,7 +325,7 @@ export default function ConvertPage() {
               {item.status === 'success' && item.convertedUrl && (
                 <button
                   onClick={() => setIsPreviewOpen(true)}
-                  className="w-full px-4 py-2.5 bg-retro-blue text-white font-heading font-black uppercase text-xs border-4 border-black shadow-[3px_3px_0px_0px_#000] hover:translate-x-[1.5px] hover:translate-y-[1.5px] hover:shadow-[1.5px_1.5px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-[0px_0px_0px_0px_#000] transition-all cursor-pointer flex items-center justify-center gap-1.5 mt-2"
+                  className="w-full px-4 py-2.5 bg-retro-blue text-white font-heading font-black uppercase text-xs border-4 border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-[0px_0px_0px_0px_#000] transition-all cursor-pointer flex items-center justify-center gap-1.5 mt-2"
                 >
                   <FileText className="w-4 h-4 stroke-[3px]" />
                   Preview Converted Image
@@ -520,7 +520,7 @@ export default function ConvertPage() {
                   <button
                     onClick={handleClear}
                     disabled={item.status === 'converting'}
-                    className="px-4 py-3 bg-white text-black font-heading font-bold uppercase text-xs border-4 border-black shadow-[4px_4px_0px_0px_#000] hover:bg-neutral-50 hover:text-red-500 hover:border-red-500 hover:shadow-[4px_4px_0px_0px_#ef4444] hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-[0px_0px_0px_0px_#000] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    className="px-4 py-3 bg-white text-black font-heading font-bold uppercase text-xs border-4 border-black shadow-[4px_4px_0px_0px_#000] hover:bg-neutral-50 hover:text-red-500 hover:border-red-500 hover:shadow-[2px_2px_0px_0px_#ef4444] hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] active:shadow-[0px_0px_0px_0px_#000] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                   >
                     <Trash2 className="w-4 h-4 stroke-[2px]" />
                     Remove
@@ -604,7 +604,7 @@ export default function ConvertPage() {
                       y: 10,
                     });
                   }}
-                  className={`px-3 py-1.5 border-2 border-black font-heading font-black uppercase text-[10px] shadow-[2px_2px_0px_0px_#000] hover:translate-x-[0.5px] hover:translate-y-[0.5px] hover:shadow-[1.5px_1.5px_0px_0px_#000] active:translate-x-[1.5px] active:translate-y-[1.5px] active:shadow-none transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 border-2 border-black font-heading font-black uppercase text-[10px] shadow-[2px_2px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer ${
                     aspect === aspectOption.val ? 'bg-retro-orange text-black' : 'bg-white text-black'
                   }`}
                 >
@@ -639,14 +639,14 @@ export default function ConvertPage() {
             <div className="border-t-4 border-black p-4 bg-white flex justify-end gap-3 select-none">
               <button
                 onClick={() => setIsCropModalOpen(false)}
-                className="px-4 py-2 bg-white text-black font-heading font-black uppercase text-xs border-4 border-black shadow-[3px_3px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all cursor-pointer"
+                className="px-4 py-2 bg-white text-black font-heading font-black uppercase text-xs border-4 border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveCrop}
                 disabled={!completedCrop || completedCrop.width === 0 || completedCrop.height === 0}
-                className="px-6 py-2 bg-retro-green text-black font-heading font-black uppercase text-xs border-4 border-black shadow-[3px_3px_0px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_#000] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all cursor-pointer disabled:opacity-50"
+                className="px-6 py-2 bg-retro-green text-black font-heading font-black uppercase text-xs border-4 border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all cursor-pointer disabled:opacity-50"
               >
                 Apply Crop
               </button>

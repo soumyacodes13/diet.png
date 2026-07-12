@@ -153,7 +153,7 @@ export default function Home() {
     (files: FileList | File[]) => {
       const filesArray = Array.from(files);
       const allowedTypes = ['image/'];
-      
+
       const firstFile = filesArray.find((file) => {
         return allowedTypes.some(type => file.type.startsWith(type));
       });
@@ -232,7 +232,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="neo-card p-6 bg-white border-4 border-black shadow-[6px_6px_0px_0px_#000] flex flex-col md:flex-row gap-6 relative animate-in zoom-in-95 duration-200">
-              
+
               <button
                 onClick={disableMobileUpload}
                 className="absolute top-4 right-4 p-1 hover:bg-neutral-100 border border-transparent hover:border-black transition-all cursor-pointer inline-flex items-center justify-center"
@@ -273,7 +273,7 @@ export default function Home() {
                       <span className="text-[9px] font-mono font-bold text-retro-pink line-clamp-3 leading-tight">{errorMsg}</span>
                       <button
                         onClick={enableMobileUpload}
-                        className="px-2 py-1 bg-retro-yellow text-black border border-black shadow-[1.5px_1.5px_0px_0px_#000] text-[9px] font-heading font-black uppercase hover:translate-x-[1px] hover:translate-y-[1px] active:translate-x-[1.5px] active:translate-y-[1.5px] active:shadow-none transition-all cursor-pointer"
+                        className="px-2 py-1 bg-retro-yellow text-black border border-black shadow-[2px_2px_0px_0px_#000] text-[9px] font-heading font-black uppercase hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer"
                       >
                         Retry
                       </button>
@@ -332,12 +332,11 @@ export default function Home() {
 
                 {/* Connection Status Badge */}
                 <div className="flex items-center gap-2 mt-4 select-none">
-                  <span className={`w-3 h-3 border border-black shadow-[1px_1px_0px_0px_#000] rounded-full inline-block ${
-                    mobileState === 'listening' ? 'bg-retro-yellow animate-pulse' :
-                    mobileState === 'uploading' ? 'bg-retro-blue animate-pulse' :
-                    mobileState === 'processing' ? 'bg-retro-green animate-pulse' :
-                    'bg-retro-pink'
-                  }`} />
+                  <span className={`w-3 h-3 border border-black shadow-[1px_1px_0px_0px_#000] rounded-full inline-block ${mobileState === 'listening' ? 'bg-retro-yellow animate-pulse' :
+                      mobileState === 'uploading' ? 'bg-retro-blue animate-pulse' :
+                        mobileState === 'processing' ? 'bg-retro-green animate-pulse' :
+                          'bg-retro-pink'
+                    }`} />
                   <span className="text-[10px] font-heading font-black uppercase tracking-wider text-black/40">
                     {mobileState === 'listening' && "Waiting for mobile connection..."}
                     {mobileState === 'uploading' && "Receiving file bytes..."}

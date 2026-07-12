@@ -82,7 +82,7 @@ export default function FileDropzone({ onFilesAdded }: FileDropzoneProps) {
           e.stopPropagation(); // Avoid triggering parent div click
           onButtonClick();
         }}
-        className="px-6 py-2.5 bg-retro-orange text-black font-heading font-black uppercase text-sm border-4 border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-[0px_0px_0px_0px_#000] transition-all cursor-pointer inline-flex items-center gap-2"
+        className="px-6 py-2.5 bg-retro-orange text-black font-heading font-black uppercase text-sm border-4 border-black shadow-[4px_4px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-[0px_0px_0px_0px_#000] transition-all cursor-pointer inline-flex items-center gap-2"
       >
         <ImageIcon className="w-4 h-4 stroke-[3px]" />
         Choose Files
